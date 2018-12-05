@@ -1,23 +1,31 @@
 import { routerRedux } from 'dva/router';
 import { stringify } from 'qs';
-import { fakeAccountLogin, getFakeCaptcha } from '@/services/api';
+import { getFakeCaptcha } from '@/services/api';
+import { fakeAccountLogin } from '@/services/account';
 import { setAuthority } from '@/utils/authority';
 import { getPageQuery } from '@/utils/utils';
 import { reloadAuthorized } from '@/utils/Authorized';
 
 export default {
-  namespace: 'login',
+  namespace: 'account',
 
   state: {
-    status: undefined,
+    user: {}
   },
 
   effects: {
     *login({ payload }, { call, put }) {
       const response = yield call(fakeAccountLogin, payload);
+      response.status = 'ok'
       yield put({
         type: 'changeLoginStatus',
-        payload: response,
+        payload: {
+          user: {...response},
+          authority: {
+            group: ['admin'],
+            token: 'token',
+          },
+        },
       });
       // Login successfully
       if (response.status === 'ok') {
@@ -49,8 +57,10 @@ export default {
       yield put({
         type: 'changeLoginStatus',
         payload: {
-          status: false,
-          currentAuthority: 'guest',
+          authority: {
+            group: ['guest'],
+            token: '',
+          },
         },
       });
       reloadAuthorized();
@@ -67,11 +77,10 @@ export default {
 
   reducers: {
     changeLoginStatus(state, { payload }) {
-      setAuthority(payload.currentAuthority);
+      setAuthority(payload.authority);
       return {
         ...state,
-        status: payload.status,
-        type: payload.type,
+        ...payload,
       };
     },
   },

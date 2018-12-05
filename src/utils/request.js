@@ -1,8 +1,8 @@
 import fetch from 'dva/fetch';
-import { notification } from 'antd';
+import {notification} from 'antd';
 import router from 'umi/router';
 import hash from 'hash.js';
-import { isAntdPro } from './utils';
+import {isAntdPro} from './utils';
 
 const codeMessage = {
   200: '服务器成功返回请求的数据。',
@@ -28,7 +28,11 @@ const checkStatus = response => {
   }
   const errortext = codeMessage[response.status] || response.statusText;
   notification.error({
-    message: `请求错误 ${response.status}: ${response.url}`,
+    message: <div>
+      请求错误{response.status}:
+      <br/>
+      {response.url.replace(window.location.origin, '')}
+    </div>,
     description: errortext,
   });
   const error = new Error(errortext);
@@ -81,7 +85,7 @@ export default function request(url, option) {
   const defaultOptions = {
     credentials: 'include',
   };
-  const newOptions = { ...defaultOptions, ...options };
+  const newOptions = {...defaultOptions, ...options};
   if (
     newOptions.method === 'POST' ||
     newOptions.method === 'PUT' ||
@@ -120,7 +124,7 @@ export default function request(url, option) {
   }
   return fetch(url, newOptions)
     .then(checkStatus)
-    .then(response => cachedSave(response, hashcode))
+    // .then(response => cachedSave(response, hashcode))
     .then(response => {
       // DELETE and 204 do not return data by default
       // using .json will report an error.
@@ -135,21 +139,21 @@ export default function request(url, option) {
         // @HACK
         /* eslint-disable no-underscore-dangle */
         window.g_app._store.dispatch({
-          type: 'login/logout',
+          type: 'account/logout',
         });
         return;
       }
       // environment should not be used
-      if (status === 403) {
-        router.push('/exception/403');
-        return;
-      }
-      if (status <= 504 && status >= 500) {
-        router.push('/exception/500');
-        return;
-      }
-      if (status >= 404 && status < 422) {
-        router.push('/exception/404');
-      }
+      // if (status === 403) {
+      //   router.push('/exception/403');
+      //   return;
+      // }
+      // if (status <= 504 && status >= 500) {
+      //   router.push('/exception/500');
+      //   return;
+      // }
+      // if (status >= 404 && status < 422) {
+      //   router.push('/exception/404');
+      // }
     });
 }

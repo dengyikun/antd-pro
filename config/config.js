@@ -111,4 +111,12 @@ export default {
   },
 
   chainWebpack: webpackPlugin,
+
+  proxy: {
+    "/api": {
+      "target": "http://47.104.233.86:10881/",
+      "changeOrigin": true,
+      "pathRewrite": { "^/api" : "" }
+    }
+  }
 };

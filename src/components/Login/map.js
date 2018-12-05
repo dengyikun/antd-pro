@@ -13,7 +13,7 @@ export default {
     rules: [
       {
         required: true,
-        message: 'Please enter username!',
+        message: '请输入账户！',
       },
     ],
   },
@@ -28,7 +28,7 @@ export default {
     rules: [
       {
         required: true,
-        message: 'Please enter password!',
+        message: '请输入密码！',
       },
     ],
   },
