@@ -23,7 +23,7 @@ export default {
           user: {...response},
           authority: {
             group: ['admin'],
-            token: 'token',
+            token: response.data,
           },
         },
       });

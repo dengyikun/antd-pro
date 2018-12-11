@@ -3,6 +3,7 @@ import {notification} from 'antd';
 import router from 'umi/router';
 import hash from 'hash.js';
 import {isAntdPro} from './utils';
+import { getAuthority } from './authority';
 
 const codeMessage = {
   200: '服务器成功返回请求的数据。',
@@ -86,6 +87,8 @@ export default function request(url, option) {
     credentials: 'include',
   };
   const newOptions = {...defaultOptions, ...options};
+  const token = getAuthority('token')
+  newOptions.headers = {token}
   if (
     newOptions.method === 'POST' ||
     newOptions.method === 'PUT' ||
@@ -144,10 +147,12 @@ export default function request(url, option) {
         return;
       }
       // environment should not be used
-      // if (status === 403) {
-      //   router.push('/exception/403');
-      //   return;
-      // }
+      if (status === 403) {
+        window.g_app._store.dispatch({
+          type: 'account/logout',
+        });
+        return;
+      }
       // if (status <= 504 && status >= 500) {
       //   router.push('/exception/500');
       //   return;

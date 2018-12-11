@@ -11,9 +11,9 @@ class InputNumber extends PureComponent {
     const {onChange} = this.props
     return (
       <AntInputNumber {...this.props}
-                     onChange={(value) => {
-                       onChange(value ? value : null)
-                     }}/>
+                      onChange={(value) => {
+                        onChange(value ? value : null)
+                      }}/>
     );
   }
 }

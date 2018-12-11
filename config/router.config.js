@@ -20,6 +20,17 @@ export default [
       // dashboard
       { path: '/', redirect: '/dashboard/analysis' },
       {
+        path: '/dish',
+        name: 'dish',
+        icon: 'coffee',
+        component: './Dish/TableList',
+      },
+      {
+        path: '/dish/detail/:id?',
+        name: '',
+        component: './Dish/Detail',
+      },
+      {
         path: '/dashboard',
         name: 'dashboard',
         icon: 'dashboard',
