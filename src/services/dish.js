@@ -1,4 +1,3 @@
-import { stringify } from 'qs';
 import request from '@/utils/request';
 
 export async function queryDish({currentPage, pageSize}) {
@@ -26,7 +25,7 @@ export async function addDish(params) {
 }
 
 export async function updateDish(params) {
-  return request('/api/rule', {
+  return request('/api/dishManage/addOrUpdate', {
     method: 'POST',
     body: {
       ...params,

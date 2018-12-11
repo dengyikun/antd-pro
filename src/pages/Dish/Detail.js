@@ -124,7 +124,7 @@ class Detail extends PureComponent {
         style: {display: 'none'}
       },
     ]
-    console.log(loading, 'loading')
+
     return (
       <PageHeaderWrapper
         title={(isAdd ? '新增' : '修改') + '菜品'}

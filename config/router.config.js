@@ -31,6 +31,12 @@ export default [
         component: './Dish/Detail',
       },
       {
+        path: '/dish-type',
+        name: 'dishType',
+        icon: 'flag',
+        component: './DishType/TableList',
+      },
+      {
         path: '/dashboard',
         name: 'dashboard',
         icon: 'dashboard',
