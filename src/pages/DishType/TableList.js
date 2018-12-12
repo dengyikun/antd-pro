@@ -38,17 +38,24 @@ class TableList extends PureComponent {
   };
 
   componentDidMount() {
-    this.fetchDish({
-      currentPage: 1,
-      pageSize: 10,
-    })
+    this.fetchDishType()
   }
 
-  fetchDish = (params) => {
-    const {dispatch} = this.props;
+  fetchDishType = (params) => {
+    const {
+      dishType: {
+        currentPage,
+        pageSize,
+      },
+      dispatch,
+    } = this.props;
     dispatch({
       type: 'dishType/fetch',
-      payload: params,
+      payload: {
+        currentPage,
+        pageSize,
+        ...params
+      },
     });
   }
 
@@ -56,66 +63,50 @@ class TableList extends PureComponent {
     const {formValues} = this.state;
 
     const params = {
-      currentPage: pagination.current,
+      currentPage: pagination.current - 1,
       pageSize: pagination.pageSize,
       ...formValues,
     };
 
-    this.fetchDish(params)
+    this.fetchDishType(params)
   };
 
   handleFormReset = () => {
-    const {form, dispatch} = this.props;
+    const {form} = this.props;
     form.resetFields();
     this.setState({
       formValues: {},
     });
-    dispatch({
-      type: 'dishType/fetch',
-      payload: {},
-    });
+    this.fetchDishType()
   };
 
-  toggleForm = () => {
-    const {expandForm} = this.state;
-    this.setState({
-      expandForm: !expandForm,
-    });
-  };
 
   handleSearch = e => {
     e.preventDefault();
 
-    const {dispatch, form} = this.props;
+    const {form} = this.props;
 
     form.validateFields((err, fieldsValue) => {
       if (err) return;
 
-      const values = {
-        ...fieldsValue,
-        updatedAt: fieldsValue.updatedAt && fieldsValue.updatedAt.valueOf(),
-      };
-
       this.setState({
-        formValues: values,
+        formValues: fieldsValue,
       });
 
-      dispatch({
-        type: 'dishType/fetch',
-        payload: values,
-      });
+      this.fetchDishType(fieldsValue)
     });
   }
 
   handleAdd = () => {
     this.setState({
       modalVisible: true,
+      record: {}
     })
   }
 
   handleEdit = record => () => {
     this.setState({
-      modalVisible: false,
+      modalVisible: true,
       record
     })
   }
@@ -124,6 +115,7 @@ class TableList extends PureComponent {
     this.setState({
       modalVisible: false,
     })
+    this.fetchDishType()
   }
 
   columns = [
@@ -136,8 +128,6 @@ class TableList extends PureComponent {
     {
       title: '类型名称',
       dataIndex: 'name',
-      width: 140,
-      align: 'center',
     },
     {
       title: '菜品简介',
@@ -148,7 +138,7 @@ class TableList extends PureComponent {
       render: (text, record) => (
         <a onClick={this.handleEdit(record)}>编辑</a>
       ),
-      width: 70,
+      width: 170,
       align: 'center',
     },
   ];
@@ -203,7 +193,7 @@ class TableList extends PureComponent {
               loading={loading}
               dataSource={data}
               pagination={{
-                current: currentPage,
+                current: currentPage + 1,
                 pageSize,
                 total
               }}

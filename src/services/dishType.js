@@ -27,3 +27,7 @@ export async function updateDishType(data) {
     body: data,
   });
 }
+
+export async function  queryAllDishType({currentPage, pageSize}) {
+  return request(`/api/dishType/queryByPage/${currentPage}/${pageSize}`);
+}

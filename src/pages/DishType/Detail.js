@@ -19,46 +19,52 @@ const {Option} = Select;
 @connect(({loading}) => ({
   loading: loading.models.dishType,
 }))
-@Form.create()
+@Form.create({
+  mapPropsToFields(props) {
+    let fields = {}
+    if (props.data) {
+      Object.keys(props.data).map(key =>  {
+        fields[key] = Form.createFormField({
+          value: props.data[key],
+        })
+      })
+    }
+    return fields;
+  },
+})
 class Detail extends PureComponent {
   state = {}
 
-  componentDidMount() {
-    // const {match, dispatch} = this.props
-    // const id = match.params.id
-    // if (id) {
-    //   this.setState({isAdd: false})
-    //   dispatch({
-    //     type: 'poi/getById',
-    //     payload: {
-    //       id
-    //     },
-    //     callback: (data) => {
-    //       this.props.form.setFieldsValue({
-    //         ...data,
-    //         id
-    //       })
-    //     }
-    //   });
-    // }
-  }
+  // static getDerivedStateFromProps(nextProps, prevState) {
+  //   if (nextProps.data && nextProps.form) {
+  //     nextProps.form.setFieldsValue({
+  //       ...nextProps.data
+  //     })
+  //   }
+  //   return null
+  // }
 
   handleSubmit = e => {
-    const {dispatch, form, onCancel} = this.props;
+    const {dispatch, form} = this.props;
     e.preventDefault();
     form.validateFieldsAndScroll((err, values) => {
       if (!err) {
         dispatch({
-          type: values.id ? 'dishType/put' : 'dishType/add',
+          type: values.id ? 'dishType/update' : 'dishType/add',
           payload: values,
           callback: () => {
             message.success(values.id ? '修改成功！' : '新增成功！', 2)
-            setTimeout(onCancel, 2000)
+            setTimeout(this.handleCancel, 700)
           }
         });
       }
     });
   };
+
+  handleCancel = () => {
+    this.props.form.resetFields()
+    this.props.onCancel()
+  }
 
   render() {
     const {form, loading, data} = this.props;
@@ -82,8 +88,10 @@ class Detail extends PureComponent {
 
     return (
       <Modal title={(data ? '修改' : '新增') + '菜品类型'}
-             okText={'保存'} onOk={this.handleSubmit}
-             {...this.props}>
+             okText={'保存'}
+             onOk={this.handleSubmit}
+             {...this.props}
+             onCancel={this.handleCancel}>
         <Spin spinning={!!loading}>
           <Form layout={'vertical'}>
             {
