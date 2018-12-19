@@ -6,6 +6,7 @@ import groupBy from 'lodash/groupBy';
 import NoticeIcon from '../NoticeIcon';
 import HeaderSearch from '../HeaderSearch';
 import SelectLang from '../SelectLang';
+import avatar from '../../assets/avatar.png';
 import styles from './index.less';
 
 export default class GlobalHeaderRight extends PureComponent {
@@ -175,12 +176,11 @@ export default class GlobalHeaderRight extends PureComponent {
           <Dropdown overlay={menu}>
             <span className={`${styles.action} ${styles.account}`}>
               <Avatar
-                size="small"
                 className={styles.avatar}
-                src={currentUser.avatar}
+                src={currentUser.avatar || avatar}
                 alt="avatar"
               />
-              <span className={styles.name}>{currentUser.name}</span>
+              <span className={styles.name}>{currentUser.name || '管理员'}</span>
             </span>
           </Dropdown>
         {/*) : (*/}

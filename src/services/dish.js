@@ -33,3 +33,7 @@ export async function updateDish(params) {
     },
   });
 }
+
+export async function queryDishById({id}) {
+  return request(`/api/dishManage/dishes/${id}`);
+}

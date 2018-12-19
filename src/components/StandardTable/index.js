@@ -31,6 +31,7 @@ class StandardTable extends PureComponent {
           dataSource={dataSource}
           pagination={{
             showQuickJumper: true,
+            showSizeChanger: true,
             ...pagination,
           }}
           onChange={this.handleTableChange}

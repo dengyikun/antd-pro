@@ -41,17 +41,24 @@ class TableList extends PureComponent {
   };
 
   componentDidMount() {
-    this.fetchDish({
-      currentPage: 1,
-      pageSize: 10,
-    })
+    this.fetchDish()
   }
 
   fetchDish = (params) => {
-    const {dispatch} = this.props;
+    const {
+      dish: {
+        currentPage,
+        pageSize,
+      },
+      dispatch,
+    } = this.props;
     dispatch({
       type: 'dish/fetch',
-      payload: params,
+      payload: {
+        currentPage,
+        pageSize,
+        ...params
+      },
     });
   }
 
@@ -59,7 +66,7 @@ class TableList extends PureComponent {
     const {formValues} = this.state;
 
     const params = {
-      currentPage: pagination.current,
+      currentPage: pagination.current - 1,
       pageSize: pagination.pageSize,
       ...formValues,
     };
@@ -68,15 +75,12 @@ class TableList extends PureComponent {
   };
 
   handleFormReset = () => {
-    const {form, dispatch} = this.props;
+    const {form,} = this.props;
     form.resetFields();
     this.setState({
       formValues: {},
     });
-    dispatch({
-      type: 'dish/fetch',
-      payload: {},
-    });
+    this.fetchDish()
   };
 
   toggleForm = () => {
@@ -94,19 +98,11 @@ class TableList extends PureComponent {
     form.validateFields((err, fieldsValue) => {
       if (err) return;
 
-      const values = {
-        ...fieldsValue,
-        updatedAt: fieldsValue.updatedAt && fieldsValue.updatedAt.valueOf(),
-      };
-
       this.setState({
-        formValues: values,
+        formValues: fieldsValue,
       });
 
-      dispatch({
-        type: 'dish/fetch',
-        payload: values,
-      });
+      this.fetchDish(fieldsValue)
     });
   }
 
@@ -115,7 +111,7 @@ class TableList extends PureComponent {
   }
 
   handleEdit = record => () => {
-    debugger
+    this.props.history.push('/dish/detail/' + record.id)
   }
 
   columns = [
@@ -143,24 +139,24 @@ class TableList extends PureComponent {
     {
       title: '菜品价格',
       dataIndex: 'price',
-      render: text => text ? `￥ ${text.toFixed(2)}` : '',
+      render: text => text ? `￥ ${text}` : '',
       width: 120,
     },
     {
       title: '菜品类型',
-      dataIndex: 'dishTypeId',
+      dataIndex: 'typeName',
       width: 140,
     },
     {
       title: '菜品简介',
       dataIndex: 'description',
     },
-    {
-      title: '上线',
-      dataIndex: 'deleteFlag',
-      width: 70,
-      align: 'center',
-    },
+    // {
+    //   title: '上线',
+    //   dataIndex: 'deleteFlag',
+    //   width: 70,
+    //   align: 'center',
+    // },
     {
       title: '操作',
       render: (text, record) => (
@@ -274,7 +270,7 @@ class TableList extends PureComponent {
             loading={loading}
             dataSource={data}
             pagination={{
-              current: currentPage,
+              current: currentPage + 1,
               pageSize,
               total
             }}

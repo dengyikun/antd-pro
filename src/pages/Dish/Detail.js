@@ -26,27 +26,40 @@ const {Option} = Select;
 @Form.create()
 class Detail extends PureComponent {
   state = {
-    isAdd: true
+    isAdd: true,
+    dishType: []
   }
 
   componentDidMount() {
-    // const {match, dispatch} = this.props
-    // const id = match.params.id
-    // if (id) {
-    //   this.setState({isAdd: false})
-    //   dispatch({
-    //     type: 'poi/getById',
-    //     payload: {
-    //       id
-    //     },
-    //     callback: (data) => {
-    //       this.props.form.setFieldsValue({
-    //         ...data,
-    //         id
-    //       })
-    //     }
-    //   });
-    // }
+    const {match, dispatch} = this.props
+    const id = match.params.id
+    if (id) {
+      this.setState({isAdd: false})
+      dispatch({
+        type: 'dish/fetchById',
+        payload: {
+          id
+        },
+        callback: (data) => {
+          this.props.form.setFieldsValue({
+            ...data,
+            id
+          })
+        }
+      });
+    }
+    dispatch({
+      type: 'dishType/fetchAll',
+      payload: {
+        currentPage: 0,
+        pageSize: 10000,
+      },
+      callback: (data) => {
+        this.setState({
+          dishType: data
+        })
+      }
+    });
   }
 
   handleSubmit = e => {
@@ -55,7 +68,7 @@ class Detail extends PureComponent {
     form.validateFieldsAndScroll((err, values) => {
       if (!err) {
         dispatch({
-          type: values.id ? 'poi/put' : 'dish/add',
+          type: values.id ? 'dish/update' : 'dish/add',
           payload: values,
           callback: () => {
             message.success(values.id ? '修改成功！' : '新增成功！', 2)
@@ -74,7 +87,7 @@ class Detail extends PureComponent {
 
   render() {
     const {form, loading } = this.props;
-    const {isAdd} = this.state;
+    const {isAdd, dishType} = this.state;
 
     const formItemLayout = {
       labelCol: {
@@ -105,6 +118,16 @@ class Detail extends PureComponent {
       {
         label: '菜品类型',
         id: 'dishTypeId',
+        children: <Select showSearch>
+          {
+            dishType.map(type => (
+              <Option value={type.id} key={type.id}>
+                {type.name}
+              </Option>
+            ))
+          }
+        </Select>,
+        required: true,
         span: formItemLayout
       },
       {

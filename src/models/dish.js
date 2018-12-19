@@ -1,4 +1,4 @@
-import { queryDish, removeDish, addDish, updateDish } from '@/services/dish';
+import { queryDish, removeDish, addDish, updateDish, queryDishById } from '@/services/dish';
 
 export default {
   namespace: 'dish',
@@ -6,41 +6,40 @@ export default {
   state: {
     data: [],
     currentPage: 0,
-    pageSize: 0,
+    pageSize: 10,
     total: 0,
   },
 
   effects: {
-    *fetch({ payload }, { call, put }) {
+    *fetch({ payload, callback }, { call, put }) {
       const response = yield call(queryDish, payload);
-      yield put({
-        type: 'save',
-        payload: {
-          ...payload,
-          ...response,
-        },
-      });
+      if (response && response.data) {
+        yield put({
+          type: 'save',
+          payload: {
+            ...payload,
+            data: response.data.results,
+            total: response.data.count,
+          },
+        });
+      }
+      if (callback) callback();
     },
     *add({ payload, callback }, { call, put }) {
       const response = yield call(addDish, payload);
-      debugger
       if (callback) callback();
     },
     *remove({ payload, callback }, { call, put }) {
       const response = yield call(removeDish, payload);
-      yield put({
-        type: 'save',
-        payload: response,
-      });
       if (callback) callback();
     },
     *update({ payload, callback }, { call, put }) {
       const response = yield call(updateDish, payload);
-      yield put({
-        type: 'save',
-        payload: response,
-      });
       if (callback) callback();
+    },
+    *fetchById({ payload, callback }, { call, put }) {
+      const response = yield call(queryDishById, payload);
+      if (callback && response) callback(response.data[0]);
     },
   },
 
