@@ -41,6 +41,7 @@ class TableList extends PureComponent {
   };
 
   componentDidMount() {
+    console.log(this.props.history)
     this.fetchDish()
   }
 
@@ -53,7 +54,7 @@ class TableList extends PureComponent {
       dispatch,
     } = this.props;
     dispatch({
-      type: 'dish/fetch',
+      type: 'order/fetch',
       payload: {
         currentPage,
         pageSize,
@@ -230,9 +231,8 @@ class TableList extends PureComponent {
     }]
 
     return (
-      <PageHeaderWrapper title="菜品列表">
+      <PageHeaderWrapper title="已完成订单列表">
         <Card bordered={false}>
-
           {/*<Form className={styles.tableListForm}>*/}
             {/*<Row gutter={{md: 8, lg: 24, xl: 48}}>*/}
               {/*{*/}
@@ -261,11 +261,11 @@ class TableList extends PureComponent {
               {/*</Col>*/}
             {/*</Row>*/}
           {/*</Form>*/}
-          <div className={styles.tableListOperator}>
-            <Button icon="plus" type="primary" onClick={this.handleAdd}>
-              新建
-            </Button>
-          </div>
+          {/*<div className={styles.tableListOperator}>*/}
+            {/*<Button icon="plus" type="primary" onClick={this.handleAdd}>*/}
+              {/*新建*/}
+            {/*</Button>*/}
+          {/*</div>*/}
           <StandardTable
             loading={loading}
             dataSource={data}

@@ -1,5 +1,9 @@
 export default {
   'menu.home': '首页',
+  'menu.order': '订单管理',
+  'menu.order.completed': '已完成',
+  'menu.order.paying': '待支付',
+  'menu.order.cancel': '已取消',
   'menu.dish': '菜品管理',
   'menu.dishType': '类型管理',
   'menu.dashboard': 'Dashboard',

@@ -65,7 +65,7 @@ class TableList extends PureComponent {
     const params = {
       currentPage: pagination.current - 1,
       pageSize: pagination.pageSize,
-      ...formValues,
+      search: formValues,
     };
 
     this.fetchDishType(params)
@@ -93,7 +93,7 @@ class TableList extends PureComponent {
         formValues: fieldsValue,
       });
 
-      this.fetchDishType(fieldsValue)
+      this.fetchDishType({search: fieldsValue})
     });
   }
 

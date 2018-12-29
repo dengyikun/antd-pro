@@ -15,9 +15,31 @@ export default [
     path: '/',
     component: '../layouts/BasicLayout',
     Routes: ['src/pages/Authorized'],
-    authority: ['admin', 'user'],
+    authority: ['admin'],
     routes: [
-      { path: '/', redirect: '/dish' },
+      { path: '/', redirect: '/order/completed' },
+      {
+        path: '/order',
+        name: 'order',
+        icon: 'form',
+        routes: [
+          {
+            path: '/order/completed',
+            name: 'completed',
+            component: './Order/TableList',
+          },
+          {
+            path: '/order/paying',
+            name: 'paying',
+            component: './Order/TableList',
+          },
+          {
+            path: '/order/cancel',
+            name: 'cancel',
+            component: './Order/TableList',
+          },
+        ],
+      },
       {
         path: '/dish',
         name: 'dish',
@@ -32,7 +54,7 @@ export default [
       {
         path: '/dish-type',
         name: 'dishType',
-        icon: 'flag',
+        icon: 'tag',
         component: './DishType/TableList',
       },
     ],
