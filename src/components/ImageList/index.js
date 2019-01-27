@@ -1,6 +1,6 @@
 import React, {PureComponent} from 'react';
+import {connect} from 'dva';
 import {Upload, Icon, Modal, message} from 'antd';
-import {getAuthority} from '@/utils/authority';
 
 const beforeUpload = (file) => {
   const isLt = file.size / 1024 / 1024 < 5;
@@ -10,7 +10,8 @@ const beforeUpload = (file) => {
   return isLt;
 }
 
-class Image extends PureComponent {
+@connect()
+class ImageList extends PureComponent {
   state = {
     previewVisible: false,
     previewImage: '',
@@ -19,26 +20,25 @@ class Image extends PureComponent {
 
   handleCancel = () => this.setState({previewVisible: false})
 
-  handleChange = (info) => {
-    const {onChange, value} = this.props;
-    if (info.file.status !== 'uploading') {
-      console.log(info.file, info.fileList);
-      this.setState({
-        loading: true
-      })
-    }
-    if (info.file.status === 'done') {
-      message.success(`${info.file.name} file uploaded successfully`);
-      onChange([...(value || []), info.file.response.data])
-      this.setState({
-        loading: false
-      })
-    } else if (info.file.status === 'error') {
-      message.error(`${info.file.name} file upload failed.`);
-      this.setState({
-        loading: false
-      })
-    }
+  customRequest = ({file}) => {
+    const {dispatch, onChange, value} = this.props;
+    const formData = new FormData()
+    formData.append('file', file)
+    this.setState({
+      loading: true
+    })
+    dispatch({
+      type: 'global/upload',
+      payload: {
+        data: formData
+      },
+      callback: file => {
+        onChange([...(value || []), file])
+        this.setState({
+          loading: false
+        })
+      }
+    });
   }
 
   handlePreview = (file) => {
@@ -69,16 +69,11 @@ class Image extends PureComponent {
     return (
       <div className="clearfix">
         <Upload
-          name={'file'}
-          action={'/api/oss/uploading'}
-          headers={{
-            token: getAuthority('token'),
-          }}
-          accept={accept}
           listType="picture-card"
-          defaultFileList={fileList}
+          accept={accept}
+          fileList={fileList}
           beforeUpload={beforeUpload}
-          onChange={this.handleChange}
+          customRequest={this.customRequest}
           onPreview={this.handlePreview}
           onRemove={this.handleRemove}
         >
@@ -99,4 +94,4 @@ class Image extends PureComponent {
   }
 }
 
-export default Image;
+export default ImageList;
