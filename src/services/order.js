@@ -28,5 +28,5 @@ export async function updateOrder(data) {
 }
 
 export async function queryOrderById({id}) {
-  return request(`/api/order/dishes/${id}`);
+  return request(`/api/order-item-manager/order-iterms/${id}`);
 }

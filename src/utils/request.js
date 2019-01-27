@@ -28,14 +28,21 @@ const checkStatus = response => {
     return response;
   }
   const errortext = codeMessage[response.status] || response.statusText;
-  notification.error({
-    message: <div>
-      请求错误{response.status}:
-      <br/>
-      {response.url.replace(window.location.origin, '')}
-    </div>,
-    description: errortext,
-  });
+  response.json()
+    .then(data => {
+      notification.error({
+        message: `请求错误 ${response.status}`,
+        description: JSON.stringify(data),
+      });
+    })
+  // notification.error({
+  //   message: <div>
+  //     请求错误{response.status}:
+  //     <br/>
+  //     {response.url.replace(window.location.origin, '')}
+  //   </div>,
+  //   description: errortext,
+  // });
   const error = new Error(errortext);
   error.name = response.status;
   error.response = response;
@@ -89,7 +96,16 @@ export default function request(url, option) {
   const newOptions = {...defaultOptions, ...options};
   const token = getAuthority('token')
   newOptions.headers = {token}
-  if (
+  if (!newOptions.method || newOptions.method === 'GET') {
+    if (newOptions.body) {
+      let query = url.includes('?') ? '' : '?'
+      for (const key in newOptions.body) {
+        query += '&' + key + '=' + encodeURIComponent(newOptions.body[key])
+      }
+      url += query
+      newOptions.body = undefined
+    }
+  }else if (
     newOptions.method === 'POST' ||
     newOptions.method === 'PUT' ||
     newOptions.method === 'DELETE'

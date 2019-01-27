@@ -1,33 +1,32 @@
 import React, {PureComponent} from 'react';
 import {connect} from 'dva';
+import moment from 'moment';
 import {
   Form,
-  Input,
   Button,
   Card,
-  Switch,
+  Divider,
   message,
   Spin,
-  Select,
-  Rate,
+  Table,
 } from 'antd';
 import PageHeaderWrapper from '@/components/PageHeaderWrapper';
 import FooterToolbar from '@/components/FooterToolbar';
-import FormItem from '@/components/FormItem';
-import Image from '@/components/Image';
-import InputNumber from '@/components/InputNumber';
+import DescriptionList from '@/components/DescriptionList';
 
-const {TextArea} = Input;
-const {Option} = Select;
+const {Description} = DescriptionList;
 
 @connect(({loading}) => ({
-  loading: loading.models.dish,
+  loading: loading.models.order,
 }))
 @Form.create()
 class Detail extends PureComponent {
   state = {
     isAdd: true,
-    dishType: []
+    data: {
+      orderItems: [],
+      totalFee: 0,
+    }
   }
 
   componentDidMount() {
@@ -36,7 +35,7 @@ class Detail extends PureComponent {
     if (id) {
       this.setState({isAdd: false})
       dispatch({
-        type: 'dish/fetchById',
+        type: 'order/fetchById',
         payload: {
           id
         },
@@ -45,21 +44,10 @@ class Detail extends PureComponent {
             ...data,
             id
           })
+          this.setState({data})
         }
       });
     }
-    dispatch({
-      type: 'dishType/fetchAll',
-      payload: {
-        currentPage: 0,
-        pageSize: 10000,
-      },
-      callback: (data) => {
-        this.setState({
-          dishType: data
-        })
-      }
-    });
   }
 
   handleSubmit = e => {
@@ -85,9 +73,42 @@ class Detail extends PureComponent {
     this.props.history.goBack()
   }
 
+
+
+  columns = [
+    {
+      title: '菜品名称',
+      dataIndex: 'name',
+    },
+    {
+      title: '数量',
+      dataIndex: 'dishNum',
+      key: 'dishNum',
+    },
+    {
+      title: '菜品封面图',
+      dataIndex: 'picUrl',
+      render: text => text ?
+        <div style={{
+          width: '75px',
+          height: '75px',
+          background: '#f1f1f1 no-repeat center center / cover',
+          display: 'inline-block',
+          backgroundImage: `url(${text})`,
+        }}>
+        </div> : '暂无图片',
+      align: 'center',
+    },
+    {
+      title: '菜品价格',
+      dataIndex: 'price',
+      render: text => text ? `￥ ${text}` : '',
+    },
+  ];
+
   render() {
     const {form, loading } = this.props;
-    const {isAdd, dishType} = this.state;
+    const {isAdd, data} = this.state;
 
     const formItemLayout = {
       labelCol: {
@@ -101,53 +122,6 @@ class Detail extends PureComponent {
       },
     };
 
-    const formItems = [
-      {
-        label: '菜品名称',
-        id: 'name',
-        required: true,
-        span: formItemLayout
-      },
-      {
-        label: '菜品价格',
-        id: 'price',
-        children: <InputNumber style={{width: '100%'}}/>,
-        required: true,
-        span: formItemLayout
-      },
-      {
-        label: '菜品类型',
-        id: 'dishTypeId',
-        children: <Select showSearch>
-          {
-            dishType.map(type => (
-              <Option value={type.id} key={type.id}>
-                {type.name}
-              </Option>
-            ))
-          }
-        </Select>,
-        required: true,
-        span: formItemLayout
-      },
-      {
-        label: '菜品封面',
-        id: 'picUrl',
-        children: <Image accept={'image/png,image/jpeg'}/>,
-        span: formItemLayout
-      },
-      {
-        label: '备注',
-        id: 'description',
-        children: <TextArea style={{minHeight: 32}} placeholder="请输入备注" rows={4}/>,
-        span: formItemLayout
-      },
-      {
-        id: 'id',
-        style: {display: 'none'}
-      },
-    ]
-
     return (
       <PageHeaderWrapper
         title={(isAdd ? '新增' : '修改') + '菜品'}
@@ -155,11 +129,28 @@ class Detail extends PureComponent {
         <Spin spinning={!!loading}>
           <Card bordered={false} style={{marginBottom: 80}}>
             <Form onSubmit={this.handleSubmit} style={{marginTop: 20}}>
-              {
-                formItems.map((itemProps, index) => {
-                  return <FormItem key={index} form={form} {...itemProps}/>
-                })
-              }
+              <DescriptionList size="large" style={{ marginBottom: 32 }}>
+                <Description term="订单编号">{data.id}</Description>
+                <Description term="下单时间">{moment(data.createTime).format('YYYY-MM-DD HH:mm:ss')}</Description>
+                <Description term="下单客户">1234123421</Description>
+                <Description term="用餐桌号">{data.diningTableNum}</Description>
+                <Description term="用餐人数">{data.mealsNum}</Description>
+                <Description term="用餐时间">{}</Description>
+              </DescriptionList>
+              <Divider style={{ marginBottom: 32 }} />
+              <DescriptionList size="large" title={'菜品信息'} style={{ marginBottom: 32 }}>
+                {
+                  data.orderItems.map((item, index) =>
+                    <Description term={item.name}>{item.dishNum} 份</Description>
+                  )
+                }
+              </DescriptionList>
+              <Divider style={{ marginBottom: 32 }} />
+              <DescriptionList size="large" col={1} style={{ marginBottom: 32 }}>
+                <Description term="备注信息">{data.remark}</Description>
+                <Description term="订单价格">{data.totalFee.toFixed(2)} ￥</Description>
+                <Description term="联系人">{data.payer}</Description>
+              </DescriptionList>
             </Form>
           </Card>
         </Spin>
@@ -167,10 +158,10 @@ class Detail extends PureComponent {
           <Button onClick={this.cancel} loading={loading}>
             取消
           </Button>
-          <Button onClick={this.handleSubmit} loading={loading}
-                  type={'primary'} style={{marginLeft: 8}}>
-            保存
-          </Button>
+          {/*<Button onClick={this.handleSubmit} loading={loading}*/}
+                  {/*type={'primary'} style={{marginLeft: 8}}>*/}
+            {/*保存*/}
+          {/*</Button>*/}
         </FooterToolbar>
       </PageHeaderWrapper>
     );

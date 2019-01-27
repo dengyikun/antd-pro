@@ -17,28 +17,17 @@ export default [
     Routes: ['src/pages/Authorized'],
     authority: ['admin'],
     routes: [
-      { path: '/', redirect: '/order/completed' },
+      { path: '/', redirect: '/order' },
       {
         path: '/order',
         name: 'order',
         icon: 'form',
-        routes: [
-          {
-            path: '/order/completed',
-            name: 'completed',
-            component: './Order/TableList',
-          },
-          {
-            path: '/order/paying',
-            name: 'paying',
-            component: './Order/TableList',
-          },
-          {
-            path: '/order/cancel',
-            name: 'cancel',
-            component: './Order/TableList',
-          },
-        ],
+        component: './Order/TableList',
+      },
+      {
+        path: '/order/detail/:id?',
+        name: '',
+        component: './Order/Detail',
       },
       {
         path: '/dish',

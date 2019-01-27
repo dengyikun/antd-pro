@@ -1,6 +1,5 @@
 import React, {PureComponent} from 'react';
 import {connect} from 'dva';
-import moment from 'moment';
 import {
   Row,
   Col,
@@ -8,9 +7,10 @@ import {
   Form,
   Input,
   Select,
-  Icon,
+  Table,
   Button,
   Menu,
+  Modal,
   InputNumber,
   DatePicker,
   message,
@@ -25,37 +25,37 @@ import styles from './TableList.less';
 const {Option} = Select;
 
 /* eslint react/no-multi-comp:0 */
-@connect(({dish, loading}) => ({
-  dish,
-  loading: loading.models.dish,
+@connect(({order, loading}) => ({
+  order,
+  loading: loading.models.order,
 }))
 @Form.create()
 class TableList extends PureComponent {
   state = {
-    modalVisible: false,
-    updateModalVisible: false,
     expandForm: false,
-    selectedRows: [],
-    formValues: {},
-    stepFormValues: {},
+    formValues: {
+      status: 'finish'
+    },
   };
 
   componentDidMount() {
-    console.log(this.props.history)
-    this.fetchDish()
+    this.fetchOrder()
   }
 
-  fetchDish = (params) => {
+  fetchOrder = (params) => {
     const {
-      dish: {
+      order: {
         currentPage,
         pageSize,
       },
       dispatch,
     } = this.props;
+    const {formValues} = this.state;
+
     dispatch({
       type: 'order/fetch',
       payload: {
+        ...formValues,
         currentPage,
         pageSize,
         ...params
@@ -64,15 +64,12 @@ class TableList extends PureComponent {
   }
 
   handleStandardTableChange = (pagination, filtersArg, sorter) => {
-    const {formValues} = this.state;
-
     const params = {
       currentPage: pagination.current - 1,
       pageSize: pagination.pageSize,
-      search: formValues,
     };
 
-    this.fetchDish(params)
+    this.fetchOrder(params)
   };
 
   handleFormReset = () => {
@@ -80,8 +77,7 @@ class TableList extends PureComponent {
     form.resetFields();
     this.setState({
       formValues: {},
-    });
-    this.fetchDish()
+    }, this.fetchOrder);
   };
 
   toggleForm = () => {
@@ -94,25 +90,62 @@ class TableList extends PureComponent {
   handleSearch = e => {
     e.preventDefault();
 
-    const {dispatch, form} = this.props;
+    const {form} = this.props;
 
     form.validateFields((err, fieldsValue) => {
       if (err) return;
 
       this.setState({
         formValues: fieldsValue,
-      });
+      }, this.fetchOrder);
 
-      this.fetchDish({search: fieldsValue})
     });
   }
 
   handleAdd = () => {
-    this.props.history.push('/dish/detail')
+    this.props.history.push('/order/detail')
   }
 
   handleEdit = record => () => {
-    this.props.history.push('/dish/detail/' + record.id)
+    this.props.history.push('/order/detail/' + record.id)
+  }
+
+  handleShowDish = record => () => {
+    this.props.dispatch({
+      type: 'order/fetchById',
+      payload: {
+        id: record.id
+      },
+      callback: data => {
+        Modal.info({
+          title: '点菜信息',
+          width: 600,
+          content: (
+            <Table
+              style={{ marginBottom: 24 }}
+              pagination={false}
+              dataSource={data.orderItems}
+              columns={[{
+                title: '菜品名称',
+                dataIndex: 'name',
+                key: 'name',
+              }, {
+                title: '数量',
+                dataIndex: 'dishNum',
+                key: 'dishNum',
+              }, {
+                title: '价格',
+                dataIndex: 'price',
+                key: 'price',
+                render: text => text ? `￥ ${text}` : '',
+              }]}
+              rowKey="id"
+            />
+          ),
+          onOk() {},
+        })
+      }
+    })
   }
 
   columns = [
@@ -123,34 +156,20 @@ class TableList extends PureComponent {
       width: 50,
     },
     {
-      title: '菜品封面图',
-      dataIndex: 'picUrl',
-      render: text => text ?
-        <div className={styles.cover}
-             style={{backgroundImage: `url(${text})`}}>
-        </div> : '暂无图片',
+      title: '桌号',
+      dataIndex: 'diningTableNum',
       width: 120,
       align: 'center',
     },
     {
-      title: '菜品名称',
-      dataIndex: 'name',
-      width: 140,
-    },
-    {
-      title: '菜品价格',
-      dataIndex: 'price',
+      title: '订单金额',
+      dataIndex: 'totalFee',
       render: text => text ? `￥ ${text}` : '',
-      width: 120,
-    },
-    {
-      title: '菜品类型',
-      dataIndex: 'typeName',
       width: 140,
     },
     {
-      title: '菜品简介',
-      dataIndex: 'description',
+      title: '备注',
+      dataIndex: 'remark',
     },
     // {
     //   title: '上线',
@@ -161,16 +180,20 @@ class TableList extends PureComponent {
     {
       title: '操作',
       render: (text, record) => (
-        <a onClick={this.handleEdit(record)}>编辑</a>
+        <>
+          <a onClick={this.handleShowDish(record)}>点菜信息</a>
+          <Divider type="vertical"/>
+          <a onClick={this.handleEdit(record)}>详情</a>
+        </>
       ),
-      width: 70,
+      width: 150,
       align: 'center',
     },
   ];
 
   render() {
     const {
-      dish: {
+      order: {
         data,
         currentPage,
         pageSize,
@@ -182,16 +205,14 @@ class TableList extends PureComponent {
     const {expandForm} = this.state
 
     const formItems = [{
-      id: 'name',
-      label: '规则名称',
-      children: <Input placeholder="请输入"/>
-    }, {
       id: 'status',
-      label: '使用状态',
+      label: '订单状态',
+      initialValue: 'finish',
       children:
         <Select placeholder="请选择" style={{width: '100%'}}>
-          <Option value="0">关闭</Option>
-          <Option value="1">运行中</Option>
+          <Option value="paying">待支付</Option>
+          <Option value="finish">已完成</Option>
+          <Option value="cancel">已取消</Option>
         </Select>
     }]
 
@@ -233,39 +254,39 @@ class TableList extends PureComponent {
     return (
       <PageHeaderWrapper title="已完成订单列表">
         <Card bordered={false}>
-          {/*<Form className={styles.tableListForm}>*/}
-            {/*<Row gutter={{md: 8, lg: 24, xl: 48}}>*/}
-              {/*{*/}
-                {/*(expandForm ? expandFormItems : formItems).map((itemProps, index) => {*/}
-                  {/*return <Col md={8} sm={24} key={index}>*/}
-                    {/*<FormItem form={form} {...itemProps}/>*/}
-                  {/*</Col>*/}
-                {/*})*/}
-              {/*}*/}
-              {/*<Col md={expandForm ? 24 : 8} sm={24} className={styles.submitButtons}>*/}
-                {/*{*/}
-                  {/*expandForm ?*/}
-                    {/*<a onClick={this.toggleForm}>*/}
-                      {/*收起 <Icon type="up"/>*/}
-                    {/*</a> :*/}
-                    {/*<a onClick={this.toggleForm}>*/}
-                      {/*展开 <Icon type="down"/>*/}
-                    {/*</a>*/}
-                {/*}*/}
-                {/*<Button style={{marginLeft: 8}} type="primary" htmlType="submit">*/}
-                  {/*查询*/}
-                {/*</Button>*/}
-                {/*<Button style={{marginLeft: 8}} onClick={this.handleFormReset}>*/}
-                  {/*重置*/}
-                {/*</Button>*/}
-              {/*</Col>*/}
-            {/*</Row>*/}
-          {/*</Form>*/}
-          {/*<div className={styles.tableListOperator}>*/}
-            {/*<Button icon="plus" type="primary" onClick={this.handleAdd}>*/}
-              {/*新建*/}
-            {/*</Button>*/}
-          {/*</div>*/}
+          <Form className={styles.tableListForm}>
+            <Row gutter={{md: 8, lg: 24, xl: 48}}>
+              {
+                (expandForm ? expandFormItems : formItems).map((itemProps, index) => {
+                  return <Col md={8} sm={24} key={index}>
+                    <FormItem form={form} {...itemProps}/>
+                  </Col>
+                })
+              }
+              <Col md={expandForm ? 24 : 8} sm={24} className={styles.submitButtons}>
+                {
+                  // expandForm ?
+                  //   <a onClick={this.toggleForm}>
+                  //     收起 <Icon type="up"/>
+                  //   </a> :
+                  //   <a onClick={this.toggleForm}>
+                  //     展开 <Icon type="down"/>
+                  //   </a>
+                }
+                <Button style={{marginLeft: 8}} type="primary" onClick={this.handleSearch}>
+                  查询
+                </Button>
+                <Button style={{marginLeft: 8}} onClick={this.handleFormReset}>
+                  重置
+                </Button>
+              </Col>
+            </Row>
+          </Form>
+          <div className={styles.tableListOperator}>
+            <Button icon="plus" type="primary" onClick={this.handleAdd}>
+              新建
+            </Button>
+          </div>
           <StandardTable
             loading={loading}
             dataSource={data}
