@@ -10,7 +10,7 @@ import {
   Select,
   Icon,
   Button,
-  Menu,
+  Modal,
   InputNumber,
   DatePicker,
   message,
@@ -114,6 +114,28 @@ class TableList extends PureComponent {
     this.props.history.push('/dish/detail/' + record.id)
   }
 
+  handleDelete = record => () => {
+    Modal.confirm({
+      title: `确认删除菜品：${record.name}`,
+      cancelText: '取消',
+      okText: '删除',
+      onOk: () => {
+        this.props.dispatch({
+          type: 'dish/remove',
+          payload: {
+            id: record.id
+          },
+          callback: (data) => {
+            if (data) {
+              message.success(`菜品：${record.name} 删除成功`)
+            }
+            this.fetchDish()
+          }
+        });
+      }
+    })
+  }
+
   columns = [
     {
       title: '#',
@@ -160,9 +182,13 @@ class TableList extends PureComponent {
     {
       title: '操作',
       render: (text, record) => (
-        <a onClick={this.handleEdit(record)}>编辑</a>
+        <>
+          <a onClick={this.handleEdit(record)}>编辑</a>
+          <Divider type="vertical"/>
+          <a onClick={this.handleDelete(record)}>删除</a>
+        </>
       ),
-      width: 70,
+      width: 140,
       align: 'center',
     },
   ];

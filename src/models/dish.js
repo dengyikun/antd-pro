@@ -31,7 +31,7 @@ export default {
     },
     *remove({ payload, callback }, { call, put }) {
       const response = yield call(removeDish, payload);
-      if (callback) callback();
+      if (callback) callback(response);
     },
     *update({ payload, callback }, { call, put }) {
       const response = yield call(updateDish, payload);

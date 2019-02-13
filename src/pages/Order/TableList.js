@@ -120,6 +120,7 @@ class TableList extends PureComponent {
         Modal.info({
           title: '点菜信息',
           width: 600,
+          okText: '确认',
           content: (
             <Table
               style={{ marginBottom: 24 }}
@@ -142,7 +143,6 @@ class TableList extends PureComponent {
               rowKey="id"
             />
           ),
-          onOk() {},
         })
       }
     })
@@ -164,7 +164,7 @@ class TableList extends PureComponent {
     {
       title: '订单金额',
       dataIndex: 'totalFee',
-      render: text => text ? `￥ ${text}` : '',
+      render: text => text ? `￥ ${(text * 100).toFixed(2)}` : '',
       width: 140,
     },
     {

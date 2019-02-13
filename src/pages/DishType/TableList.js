@@ -22,6 +22,7 @@ import FormItem from '@/components/FormItem';
 import Detail from './Detail';
 
 import styles from './TableList.less';
+import {Modal} from "antd/lib/index";
 
 const {Option} = Select;
 
@@ -118,6 +119,28 @@ class TableList extends PureComponent {
     this.fetchDishType()
   }
 
+  handleDelete = record => () => {
+    Modal.confirm({
+      title: `确认删除菜品分类：${record.name}`,
+      cancelText: '取消',
+      okText: '删除',
+      onOk: () => {
+        this.props.dispatch({
+          type: 'dishType/remove',
+          payload: {
+            id: record.id
+          },
+          callback: (data) => {
+            if (data) {
+              message.success(`菜品分类：${record.name} 删除成功`)
+            }
+            this.fetchDishType()
+          }
+        });
+      }
+    })
+  }
+
   columns = [
     {
       title: '#',
@@ -136,7 +159,11 @@ class TableList extends PureComponent {
     {
       title: '操作',
       render: (text, record) => (
-        <a onClick={this.handleEdit(record)}>编辑</a>
+        <>
+          <a onClick={this.handleEdit(record)}>编辑</a>
+          <Divider type="vertical"/>
+          <a onClick={this.handleDelete(record)}>删除</a>
+        </>
       ),
       width: 170,
       align: 'center',

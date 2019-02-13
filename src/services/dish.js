@@ -4,10 +4,9 @@ export async function queryDish({currentPage, pageSize}) {
   return request(`/api/dishManage/queryByPage/${currentPage}/${pageSize}`);
 }
 
-export async function removeDish(data) {
-  return request('/api/dishManage/addOrUpdate', {
-    method: 'POST',
-    body: data,
+export async function removeDish({id}) {
+  return request(`/api/dishManage/dishes/${id}`, {
+    method: 'DELETE',
   });
 }
 
