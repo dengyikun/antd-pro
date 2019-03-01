@@ -164,7 +164,7 @@ class TableList extends PureComponent {
     {
       title: '订单金额',
       dataIndex: 'totalFee',
-      render: text => text ? `￥ ${(text * 100).toFixed(2)}` : '',
+      render: text => text ? `￥ ${(text / 100).toFixed(2)}` : '',
       width: 140,
     },
     {

@@ -148,7 +148,7 @@ class Detail extends PureComponent {
               <Divider style={{ marginBottom: 32 }} />
               <DescriptionList size="large" col={1} style={{ marginBottom: 32 }}>
                 <Description term="备注信息">{data.remark}</Description>
-                <Description term="订单价格">{(data.totalFee * 100).toFixed(2)} ￥</Description>
+                <Description term="订单价格">{(data.totalFee / 100).toFixed(2)} ￥</Description>
                 <Description term="联系人">{data.payer}</Description>
               </DescriptionList>
             </Form>
