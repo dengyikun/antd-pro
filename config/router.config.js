@@ -42,9 +42,15 @@ export default [
       },
       {
         path: '/dish-type',
-        name: 'dishType',
+        name: 'dishtype',
         icon: 'tag',
         component: './DishType/TableList',
+      },
+      {
+        path: '/wx-code',
+        name: 'wxcode',
+        icon: 'qrcode',
+        component: './WXCode',
       },
     ],
   },

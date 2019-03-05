@@ -117,6 +117,11 @@ export default {
       "target": "http://47.104.233.86:10881/",
       "changeOrigin": true,
       "pathRewrite": { "^/api" : "" }
+    },
+
+    "/wxapp": {
+      "target": "https://www.russan.xyz/",
+      "changeOrigin": true,
     }
   }
 };
